@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Bell, Plus, Users, Vote, CalendarCheck, MapPin, ChevronRight } from 'lucide-react';
+import { Bell, Users, Vote, CalendarCheck, MapPin, ChevronRight } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 import { GlassCard } from '@/components/packvote/shared/GlassCard';
 import { ProgressRing } from '@/components/packvote/shared/ProgressRing';
@@ -177,16 +177,6 @@ export function HomeScreen() {
           <ChevronRight className="w-4 h-4 text-purple-400 shrink-0" />
         </GlassCard>
       )}
-
-      {/* FAB */}
-      <motion.button
-        onClick={() => navigate('create-trip')}
-        whileTap={{ scale: 0.9 }}
-        className="fixed bottom-24 right-4 w-14 h-14 rounded-full gradient-purple shadow-lg shadow-purple-500/30 flex items-center justify-center z-30 max-w-md"
-        aria-label="Create new trip"
-      >
-        <Plus className="w-6 h-6 text-white" />
-      </motion.button>
     </div>
   );
 }

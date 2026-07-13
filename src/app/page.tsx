@@ -1,31 +1,80 @@
-'use client'
+'use client';
 
-export default function Home() {
+import { useEffect } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useAppStore } from '@/lib/store';
+import { BottomNav } from '@/components/packvote/BottomNav';
+import { HomeScreen } from '@/components/packvote/screens/HomeScreen';
+import { ExploreScreen } from '@/components/packvote/screens/ExploreScreen';
+import CreateTripScreen from '@/components/packvote/screens/CreateTripScreen';
+import { TripDetailScreen } from '@/components/packvote/screens/TripDetailScreen';
+import { VotingScreen } from '@/components/packvote/screens/VotingScreen';
+import { ResultsScreen } from '@/components/packvote/screens/ResultsScreen';
+import { SurveyScreen } from '@/components/packvote/screens/SurveyScreen';
+import { ChatScreen } from '@/components/packvote/screens/ChatScreen';
+import { ProfileScreen } from '@/components/packvote/screens/ProfileScreen';
+import type { Screen } from '@/lib/types';
+
+const SCREEN_MAP: Record<Screen, React.ComponentType> = {
+  home: HomeScreen,
+  explore: ExploreScreen,
+  'create-trip': CreateTripScreen,
+  'trip-detail': TripDetailScreen,
+  voting: VotingScreen,
+  results: ResultsScreen,
+  survey: SurveyScreen,
+  chat: ChatScreen,
+  profile: ProfileScreen,
+  itinerary: TripDetailScreen,
+};
+
+export default function Page() {
+  const { nav, setCurrentTrip, navigate } = useAppStore();
+
+  // Load trip data when navigating to trip-detail
+  useEffect(() => {
+    if (nav.currentScreen === 'trip-detail' && nav.tripId) {
+      setCurrentTrip(nav.tripId);
+    }
+  }, [nav.currentScreen, nav.tripId, setCurrentTrip]);
+
+  // When navigating to voting, ensure trip is loaded
+  useEffect(() => {
+    if ((nav.currentScreen === 'voting' || nav.currentScreen === 'survey' || nav.currentScreen === 'chat') && nav.tripId) {
+      setCurrentTrip(nav.tripId);
+    }
+  }, [nav.currentScreen, nav.tripId, setCurrentTrip]);
+
+  const ScreenComponent = SCREEN_MAP[nav.currentScreen];
+  const showBottomNav = !['trip-detail', 'results', 'survey', 'chat', 'itinerary', 'voting'].includes(nav.currentScreen);
+
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: '100vh',
-      gap: '2rem',
-      padding: '1rem'
-    }}>
-      <div style={{
-        position: 'relative',
-        width: '6rem',
-        height: '6rem'
-      }}>
-        <img
-          src="/logo.svg"
-          alt="Z.ai Logo"
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'contain'
-          }}
-        />
-      </div>
-    </div>
-  )
+    <main className="relative min-h-dvh overflow-hidden">
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={nav.currentScreen}
+          initial={{ opacity: 0, x: 10 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -10 }}
+          transition={{ duration: 0.2 }}
+        >
+          {ScreenComponent && <ScreenComponent />}
+        </motion.div>
+      </AnimatePresence>
+
+      {/* Bottom Navigation */}
+      <AnimatePresence>
+        {showBottomNav && (
+          <motion.div
+            initial={{ y: 80 }}
+            animate={{ y: 0 }}
+            exit={{ y: 80 }}
+            transition={{ type: 'spring', bounce: 0.1, duration: 0.4 }}
+          >
+            <BottomNav />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </main>
+  );
 }
