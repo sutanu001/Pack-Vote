@@ -1,0 +1,165 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  avatar    String?
+  phone     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tripsCreated   Trip[]          @relation("TripCreator")
+  tripMemberships TripMember[]
+  surveyResponses SurveyResponse[]
+  votes           Vote[]
+  chatMessages    ChatMessage[]
+}
+
+model Trip {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  startDate   String?
+  endDate     String?
+  budget      String?  // e.g., "$500", "$1000-$2000"
+  destinationType String? // "beach", "mountain", "city", "adventure", "cultural"
+  status      String   @default("planning") // planning, surveying, voting, confirmed, completed
+  coverImage  String?
+  inviteCode  String   @unique
+  aiModel     String?  // which AI model was used
+  promptVersion String? // versioned prompt used
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  creatorId   String
+  creator     User     @relation("TripCreator", fields: [creatorId], references: [id])
+
+  members       TripMember[]
+  destinations  Destination[]
+  surveys       Survey[]
+  votes         Vote[]
+  chatMessages  ChatMessage[]
+  itineraryItems ItineraryItem[]
+}
+
+model TripMember {
+  id       String @id @default(cuid())
+  role     String @default("member") // creator, member
+  joinedAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+  tripId String
+  trip   Trip   @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tripId])
+}
+
+model Survey {
+  id        String   @id @default(cuid())
+  tripId    String
+  trip      Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  questions String   // JSON array of survey questions
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  responses  SurveyResponse[]
+}
+
+model SurveyResponse {
+  id        String   @id @default(cuid())
+  answers   String   // JSON object of answers
+  createdAt DateTime @default(now())
+
+  surveyId String
+  survey   Survey   @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  userId   String
+  user     User     @relation(fields: [userId], references: [id])
+
+  @@unique([surveyId, userId])
+}
+
+model Destination {
+  id          String @id @default(cuid())
+  name        String
+  country     String
+  description String
+  imageUrl    String?
+  highlights  String  // JSON array of highlights
+  estimatedCost String?
+  bestTimeToVisit String?
+  rating      Float   @default(0)
+  aiReasoning String? // Why AI suggested this
+  score       Float?  // AI confidence score
+  rank        Int?
+
+  tripId String
+  trip   Trip   @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  votes  Vote[]
+}
+
+model Vote {
+  id            String   @id @default(cuid())
+  rank          Int      // 1 = first choice, 2 = second, etc.
+  createdAt     DateTime @default(now())
+
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  destinationId String
+  destination   Destination @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+  tripId        String
+  trip          Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, destinationId, tripId])
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  content   String
+  role      String   // "user" or "assistant"
+  createdAt DateTime @default(now())
+
+  userId String?
+  user   User?  @relation(fields: [userId], references: [id])
+  tripId String
+  trip   Trip   @relation(fields: [tripId], references: [id], onDelete: Cascade)
+}
+
+model ItineraryItem {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  day         Int
+  time        String?
+  location    String?
+  category    String?  // "activity", "food", "transport", "accommodation"
+  isCompleted Boolean  @default(false)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  tripId String
+  trip   Trip   @relation(fields: [tripId], references: [id], onDelete: Cascade)
+}
+
+model AIModelLog {
+  id            String   @id @default(cuid())
+  modelProvider String   // "openai", "anthropic", "deepseek", "gemini"
+  modelName     String   // "gpt-4o", "claude-3.5-sonnet", etc.
+  promptVersion String
+  inputTokens   Int      @default(0)
+  outputTokens  Int      @default(0)
+  latencyMs     Int      @default(0)
+  costUsd       Float    @default(0)
+  success       Boolean  @default(true)
+  errorMessage  String?
+  createdAt     DateTime @default(now())
+}
