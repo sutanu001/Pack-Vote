@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAppStore } from '@/lib/store';
 import { BottomNav } from '@/components/packvote/BottomNav';
@@ -29,7 +29,10 @@ const SCREEN_MAP: Record<Screen, React.ComponentType> = {
 };
 
 export default function Page() {
-  const { nav, setCurrentTrip, navigate } = useAppStore();
+  const { nav, setCurrentTrip } = useAppStore();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => { setMounted(true); }, []);
 
   // Load trip data when navigating to trip-detail
   useEffect(() => {
@@ -53,7 +56,7 @@ export default function Page() {
       <AnimatePresence mode="wait">
         <motion.div
           key={nav.currentScreen}
-          initial={{ opacity: 0, x: 10 }}
+          initial={mounted ? { opacity: 0, x: 10 } : false}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -10 }}
           transition={{ duration: 0.2 }}
@@ -63,18 +66,16 @@ export default function Page() {
       </AnimatePresence>
 
       {/* Bottom Navigation */}
-      <AnimatePresence>
-        {showBottomNav && (
-          <motion.div
-            initial={{ y: 80 }}
-            animate={{ y: 0 }}
-            exit={{ y: 80 }}
-            transition={{ type: 'spring', bounce: 0.1, duration: 0.4 }}
-          >
-            <BottomNav />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {showBottomNav && (
+        <motion.div
+          initial={mounted ? { y: 80 } : false}
+          animate={{ y: 0 }}
+          exit={{ y: 80 }}
+          transition={{ type: 'spring', bounce: 0.1, duration: 0.4 }}
+        >
+          <BottomNav />
+        </motion.div>
+      )}
     </main>
   );
 }
