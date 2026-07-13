@@ -16,6 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 import type { TripStatus, ItineraryItem } from '@/lib/types';
 
 const STATUS_STEPS: { label: string; status: TripStatus }[] = [
@@ -65,6 +66,9 @@ export function TripDetailScreen() {
 
   const handleCopyCode = () => {
     navigator.clipboard?.writeText(trip.inviteCode);
+    toast.success('Invite code copied!', {
+      description: `Code: ${trip.inviteCode} — share with your group`,
+    });
   };
 
   const formatDate = (d?: string) => {
@@ -204,7 +208,11 @@ export function TripDetailScreen() {
             </div>
             {trip.status === 'planning' && trip.surveyCompleted < trip.totalMembers && (
               <Button
-                onClick={() => navigate('survey')}
+                onClick={() => {
+                  toast.info('Survey reminders sent!', {
+                    description: `${trip.totalMembers - trip.surveyCompleted} members will be notified`,
+                  });
+                }}
                 className="w-full mt-3 h-10 rounded-full gradient-purple text-white text-sm"
               >
                 <Mail className="w-4 h-4 mr-2" />

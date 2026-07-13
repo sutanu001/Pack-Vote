@@ -2,14 +2,16 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Trophy, Medal, Star, Sparkles, RotateCcw, Share2, PartyPopper, MapPin, DollarSign, Calendar } from 'lucide-react';
+import { ArrowLeft, Trophy, Star, Sparkles, RotateCcw, Share2, PartyPopper, MapPin, DollarSign, Confetti } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { GlassCard } from '@/components/packvote/shared/GlassCard';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 export function ResultsScreen() {
-  const { destinations, goBack, navigate } = useAppStore();
+  const { destinations, goBack, navigate, nav, updateTrip } = useAppStore();
+  const [confirmed, setConfirmed] = useState(false);
 
   const sorted = [...destinations].sort((a, b) => (b.score || 0) - (a.score || 0));
   const winner = sorted[0];
@@ -112,14 +114,37 @@ export function ResultsScreen() {
       {/* Action Buttons */}
       <div className="flex gap-3 mb-6">
         <Button
-          onClick={() => navigate('trip-detail')}
-          className="flex-1 h-11 rounded-full gradient-purple text-white font-semibold shadow-lg shadow-purple-300/30"
+          onClick={() => {
+            if (nav.tripId) updateTrip(nav.tripId, { status: 'confirmed' });
+            setConfirmed(true);
+            toast.success(`${winner.name} confirmed as your destination!`, {
+              description: 'Your group can now start planning the itinerary.',
+            });
+          }}
+          disabled={confirmed}
+          className={cn(
+            'flex-1 h-11 rounded-full font-semibold shadow-lg shadow-purple-300/30 gap-2',
+            confirmed ? 'bg-emerald-500 hover:bg-emerald-500 text-white' : 'gradient-purple text-white'
+          )}
         >
-          <Sparkles className="w-4 h-4 mr-2" />
-          Confirm Destination
+          {confirmed ? (
+            <>
+              <Sparkles className="w-4 h-4" />
+              Destination Confirmed!
+            </>
+          ) : (
+            <>
+              <Sparkles className="w-4 h-4 mr-2" />
+              Confirm Destination
+            </>
+          )}
         </Button>
-        <Button variant="outline" className="h-11 rounded-full border-purple-200 text-purple-700 px-4">
-          <RotateCcw className="w-4 h-4" />
+        <Button
+          variant="outline"
+          className="h-11 rounded-full border-purple-200 text-purple-700 px-4"
+          onClick={() => toast.info('Results shared with your group!')}
+        >
+          <Share2 className="w-4 h-4" />
         </Button>
       </div>
 

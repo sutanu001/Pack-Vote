@@ -5,6 +5,7 @@ import { Home, Compass, Plus, CheckSquare2, User } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 import type { Screen } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 interface NavItem {
   screen: Screen;
@@ -24,10 +25,17 @@ const HIDDEN_SCREENS: Screen[] = ['trip-detail', 'results', 'survey', 'chat', 'i
 
 export function BottomNav() {
   const { nav, navigate, trips } = useAppStore();
-  const showNav = !HIDDEN_SCREENS.includes(nav.currentScreen) || nav.currentScreen === 'create-trip';
-  const hasVotingTrip = trips.some((t) => t.status === 'voting');
+  const showNav = !HIDDEN_SCREENS.includes(nav.currentScreen);
+  const votingTrips = trips.filter((t) => t.status === 'voting');
 
   if (!showNav) return null;
+
+  const handleVoteClick = () => {
+    if (votingTrips.length > 0) {
+      const trip = votingTrips[0];
+      navigate('voting', { tripId: trip.id });
+    }
+  };
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 safe-bottom">
@@ -37,7 +45,8 @@ export function BottomNav() {
             {NAV_ITEMS.map((item) => {
               const isActive = nav.currentScreen === item.screen;
               const isCreate = item.screen === 'create-trip';
-              const isDisabled = item.screen === 'voting' && !hasVotingTrip;
+              const isVote = item.screen === 'voting';
+              const isDisabled = isVote && votingTrips.length === 0;
               const Icon = item.icon;
 
               if (isCreate) {
@@ -59,19 +68,36 @@ export function BottomNav() {
               return (
                 <button
                   key={item.screen}
-                  onClick={() => !isDisabled && navigate(item.screen)}
+                  onClick={() => {
+                    if (isDisabled) {
+                      toast.info('No trips need voting right now');
+                      return;
+                    }
+                    if (isVote) {
+                      handleVoteClick();
+                    } else {
+                      navigate(item.screen);
+                    }
+                  }}
                   className={cn(
                     'flex flex-col items-center gap-0.5 py-1.5 px-3 relative transition-colors',
                     isDisabled && 'opacity-30 cursor-not-allowed'
                   )}
                   aria-label={item.label}
                 >
-                  <Icon
-                    className={cn(
-                      'w-5 h-5 transition-colors',
-                      isActive ? 'text-purple-700' : 'text-gray-400'
+                  <div className="relative">
+                    <Icon
+                      className={cn(
+                        'w-5 h-5 transition-colors',
+                        isActive ? 'text-purple-700' : 'text-gray-400'
+                      )}
+                    />
+                    {isVote && votingTrips.length > 0 && (
+                      <span className="absolute -top-1.5 -right-2 w-4 h-4 bg-amber-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                        {votingTrips.length}
+                      </span>
                     )}
-                  />
+                  </div>
                   <span
                     className={cn(
                       'text-[10px] font-medium transition-colors',

@@ -11,6 +11,7 @@ import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
 import { GlassCard } from '@/components/packvote/shared/GlassCard';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 import type { SurveyQuestion } from '@/lib/types';
 
 export function SurveyScreen() {
@@ -30,6 +31,9 @@ export function SurveyScreen() {
       setCurrentQ(currentQ + 1);
     } else {
       submitSurvey();
+      toast.success('Survey submitted!', {
+        description: 'Your preferences will help AI find the best destinations.',
+      });
       navigate('trip-detail');
     }
   };

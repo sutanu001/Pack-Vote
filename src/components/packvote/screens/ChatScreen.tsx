@@ -13,6 +13,7 @@ export function ChatScreen() {
   const { chatMessages, addChatMessage, isChatLoading, setChatLoading, goBack, currentTrip, nav, setCurrentTrip } = useAppStore();
   const [input, setInput] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Ensure trip data is loaded when entering chat
   useEffect(() => {
@@ -20,7 +21,6 @@ export function ChatScreen() {
       setCurrentTrip(nav.tripId);
     }
   }, [nav.tripId, chatMessages.length, setCurrentTrip]);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (scrollRef.current) {

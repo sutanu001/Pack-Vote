@@ -19,11 +19,12 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { ArrowLeft, GripVertical, Star, MapPin, ChevronRight, Send, CheckCircle2, Sparkles } from 'lucide-react';
+import { ArrowLeft, GripVertical, Star, MapPin, ChevronRight, Send, CheckCircle2, Sparkles, RotateCcw } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { GlassCard } from '@/components/packvote/shared/GlassCard';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 import type { Destination } from '@/lib/types';
 
 function SortableDestCard({ dest, rank }: { dest: Destination; rank: number }) {
@@ -133,6 +134,10 @@ export function VotingScreen() {
       setVote(destId, idx + 1);
     });
     submitVotes();
+    const topChoice = destinations.find(d => d.id === localOrder[0]);
+    toast.success('Vote submitted!', {
+      description: `Your top choice: ${topChoice?.name || 'Unknown'}`,
+    });
     navigate('results');
   };
 
