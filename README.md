@@ -2,11 +2,7 @@
 
 > **An AI-powered group travel planning application designed to make coordinating trips with friends effortless and fun.**
 
-<div align="center">
-  <img src="./screenshot-home.png" alt="Pack Vote Home" width="800" />
-</div>
 
-<br />
 
 Planning group travel often devolves into chaotic group chats, lost links, and endless arguments over budgets and destinations. **Pack Vote** solves this by providing a centralized, mobile-first web application where groups can propose ideas, collect preferences, and democratically decide on their next adventure—all guided by an intelligent AI travel buddy.
 
