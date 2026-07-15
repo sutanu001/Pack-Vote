@@ -47,6 +47,7 @@ export default function CreateTripScreen() {
   const [step, setStep] = useState(1);
   const [participantInput, setParticipantInput] = useState("");
   const [participants, setParticipants] = useState<string[]>([]);
+  const [generatedInvite, setGeneratedInvite] = useState<{ code: string; link: string } | null>(null);
 
   const { createTripForm, setCreateTripForm, addTrip, navigate, goBack } =
     useAppStore();
@@ -426,12 +427,64 @@ export default function CreateTripScreen() {
                 className="w-full rounded-2xl h-12 border-purple-200 text-purple-700 hover:bg-purple-50 gap-2"
                 onClick={() => {
                   const code = generateInviteCode();
-                  navigator.clipboard?.writeText(code);
+                  const link = `${typeof window !== 'undefined' ? window.location.origin : 'https://packvote.app'}/join/${code}`;
+                  setGeneratedInvite({ code, link });
+                  navigator.clipboard?.writeText(link).then(() => {
+                    toast.success('Invite link copied! 🎉', {
+                      description: `Share this with your group: ${code}`,
+                    });
+                  }).catch(() => {
+                    toast.success('Invite link generated! 🎉', {
+                      description: `Code: ${code} — share it with your group`,
+                    });
+                  });
                 }}
               >
                 <Link2 className="h-4 w-4" />
-                Generate Invite Link
+                {generatedInvite ? 'Regenerate Invite Link' : 'Generate Invite Link'}
               </Button>
+
+              {/* Generated Invite Display */}
+              {generatedInvite && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10, scale: 0.97 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  className="glass-card-purple rounded-2xl p-4 space-y-3"
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-8 h-8 rounded-full gradient-purple flex items-center justify-center">
+                      <Link2 className="h-4 w-4 text-white" />
+                    </div>
+                    <p className="text-sm font-bold text-purple-800">Invite Link Ready!</p>
+                  </div>
+
+                  <div className="bg-white/80 rounded-xl p-3 border border-purple-100">
+                    <p className="text-[10px] text-muted-foreground mb-1 font-medium">INVITE LINK</p>
+                    <p className="text-xs font-mono text-purple-700 break-all leading-relaxed">{generatedInvite.link}</p>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <div className="flex-1 bg-white/80 rounded-xl p-3 border border-purple-100">
+                      <p className="text-[10px] text-muted-foreground mb-1 font-medium">INVITE CODE</p>
+                      <p className="text-lg font-bold tracking-widest text-purple-700">{generatedInvite.code}</p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      className="self-end rounded-xl h-10 text-xs text-purple-600 hover:bg-purple-100 gap-1.5"
+                      onClick={() => {
+                        navigator.clipboard?.writeText(generatedInvite.link);
+                        toast.success('Link copied again! 📋');
+                      }}
+                    >
+                      📋 Copy
+                    </Button>
+                  </div>
+
+                  <p className="text-[11px] text-muted-foreground">
+                    Share this link or code with your travel buddies so they can join the trip!
+                  </p>
+                </motion.div>
+              )}
             </div>
           )}
         </motion.div>
