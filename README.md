@@ -36,17 +36,6 @@ After a destination is confirmed, the app generates a day-by-day itinerary templ
 
 ---
 
-## 📸 Application Showcase
-
-| Explore Destinations | AI Chat Assistant |
-|:---:|:---:|
-| <img src="./screenshot-explore.png" width="400" /> | <img src="./screenshot-chat.png" width="400" /> |
-
-| Drag & Drop Voting | Trip Dashboard |
-|:---:|:---:|
-| <img src="./screenshot-voting.png" width="400" /> | <img src="./screenshot-trip-detail.png" width="400" /> |
-
----
 
 ## 🛠️ Technical Architecture
 
